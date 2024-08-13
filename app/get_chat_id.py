@@ -1,18 +1,30 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
+from dotenv import load_dotenv
 import os
 
-bot = Bot(token=os.getenv("TELEGRAM_TOKEN"))
+# Загрузить переменные окружения из .env файла
+load_dotenv()
 
+# Инициализация бота
+bot = Bot(token=os.getenv("TELEGRAM_TOKEN"))
 dp = Dispatcher(bot)
 
-@dp.message_handler(content_types=types.ContentType.NEW_CHAT_MEMBERS)
-async def on_new_chat_member(message: types.Message):
-    for member in message.new_chat_members:
-        if member.id == (await bot.me).id:
-            chat_id = message.chat.id
-            chat_title = message.chat.title
-            print(f'Бот добавлен в канал: {chat_title} (ID: {chat_id})')
+
+async def send_test_message():
+    channel_id = -4204753528  # Укажите ID вашего канала
+    message = "Это тестовое сообщение в канал"
+    # 4268211030 Сергей
+    try:
+        await bot.send_message(chat_id=channel_id, text=message)
+        print(f"Сообщение успешно отправлено в канал {channel_id}")
+    except Exception as e:
+        print(f"Не удалось отправить сообщение: {e}")
+
+
+async def on_startup(dp):
+    await send_test_message()
+
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, on_startup=on_startup)
